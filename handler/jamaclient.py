@@ -64,17 +64,20 @@ class JamaClient:
     def delete_item(self, item_id):
         url = self.jama_config.rest_url + "items/" + str(item_id)
         response = self.delete(url=url)
-        json_response = json.loads(response.text)
-        if json_response["meta"]["status"] == "Not Found":
-            print json_response
-            print("Item not found with id " + str(item_id))
+        if response.status_code != 204:
+            json_response = json.loads(response.text)
+            if json_response["meta"]["status"] == "Not Found":
+                print json_response
+                print("Item not found with id " + str(item_id))
+            else:
+                return [json_response["data"]]
         else:
-            return [json_response["data"]]
+            print("Success deleting item with ID: " + str(item_id))
 
     def delete(self, url):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            return requests.get(url, auth=self.auth, verify=self.verify)
+            return requests.delete(url, auth=self.auth, verify=self.verify)
 
     def get_children(self, item_id):
         return self.get_all("items/{}/children".format(item_id))
