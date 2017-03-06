@@ -64,17 +64,15 @@ class JamaClient:
     def delete_item(self, item_id):
         url = self.jama_config.rest_url + "items/" + str(item_id)
         response = self.delete(url=url)
-        json_response = json.loads(response.text)
-        if json_response["meta"]["status"] == "Not Found":
-            print json_response
-            print("Item not found with id " + str(item_id))
+        if response.status_code == 204:
+            return True
         else:
-            return [json_response["data"]]
+            return False
 
     def delete(self, url):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            return requests.get(url, auth=self.auth, verify=self.verify)
+            return requests.delete(url, auth=self.auth, verify=self.verify)
 
     def get_children(self, item_id):
         return self.get_all("items/{}/children".format(item_id))
@@ -83,9 +81,11 @@ class JamaClient:
         items = self.get(self.jama_config.rest_url + "abstractitems?itemtype=" + str(self.jama_config.itemType) + "&documentKey={}".format(document_key))
         json_response = json.loads(items.text)
         if len(json_response["data"]) > 1:
-            raise StandardError("Multiple items with ID: {}".format(document_key))
+            print("Multiple items with ID: {}".format(document_key))
+            return None
         if len(json_response["data"]) < 1:
-            raise StandardError("No items found with ID: {}".format(document_key))
+            print("No items found with ID: {}".format(document_key))
+            return None
         return json_response["data"][0]
 
     def get_all(self, resource):

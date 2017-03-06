@@ -13,15 +13,16 @@ class Delete_Duplicates():
     def delete(self, rows):
         for row in rows:
             item = self.jamaClient.get_item_for_documentkey(row)
-            if str(rows.get(row)).strip("]").strip("[").__contains__(item["fields"]["name"]) == False:
-                self.ignore_list.__setitem__(row, item)
-                print("Name from csv file did not match retrieved item's name. Item with documentKey: " + row + " will not be deleted.")
-                self.ignored_item_counter = self.ignored_item_counter + 1
-            else:
-                self.deleted_list.__setitem__(row, item)
-                print("deleting item with id: " + str(item["id"]) + " and documentKey: " + row)
-                self.jamaClient.delete_item(item["id"])
-                self.deleted_item_counter = self.deleted_item_counter + 1
+            if item != None:
+                if str(rows.get(row)).strip("]").strip("[").__contains__(item["fields"]["name"]) == False:
+                    self.ignore_list.__setitem__(row, item)
+                    print("Name from csv file did not match retrieved item's name. Item with documentKey: " + row + " will not be deleted.")
+                    self.ignored_item_counter = self.ignored_item_counter + 1
+                else:
+                    self.deleted_list.__setitem__(row, item)
+                    print("deleting item with id: " + str(item["id"]) + " and documentKey: " + row)
+                    if self.jamaClient.delete_item(item["id"]) == True:
+                        self.deleted_item_counter = self.deleted_item_counter + 1
 
 
         print("Total number of items deleted: " + str(self.deleted_item_counter))
