@@ -14,7 +14,8 @@ class Delete_Duplicates():
         for row in rows:
             item = self.jamaClient.get_item_for_documentkey(row)
             if item != None:
-                if str(rows.get(row)).strip("]").strip("[").__contains__(item["fields"]["name"]) == False:
+                if self.stripString(str(rows.get(row))) != self.stripString(item["fields"]["name"]):
+                # if str(rows.get(row)).strip("]").strip("[").__contains__(item["fields"]["name"]) == False:
                     self.ignore_list.__setitem__(row, item)
                     print("Name from csv file did not match retrieved item's name. Item with documentKey: " + row + " will not be deleted.")
                     self.ignored_item_counter = self.ignored_item_counter + 1
@@ -36,3 +37,6 @@ class Delete_Duplicates():
             with open("deleted_items.json", "wb") as fp:
                 json.dump(self.deleted_list, fp)
 
+
+    def stripString(self, row):
+        return row.replace("\"", "").replace("\'", "").replace("[", "").replace("]", "").replace("\\\\", "")
